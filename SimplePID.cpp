@@ -36,6 +36,8 @@ private:
     double setPoint;
     double dt;
     double sampleTime;
+    double maxI = 1;
+    double maxD = 1;
 };
 
 PID::PID(double kp, double ki, double kd, double sp, double dt)
@@ -64,7 +66,19 @@ void PID::setSampleTime(double sampleTime){
 double PID::compute(double input){
     error = setPoint - input;
     integral = integral + error * dt;
+    if (integral > maxI){
+        integral = maxI;
+    }
+    else if (integral < -maxI){
+        integral = -maxI;
+    }
     derivative = (error - last_e) / dt;
+    if (derivative > maxD){
+        derivative = maxD;
+    }
+    else if (derivative < -maxD){
+        derivative = -maxD;
+    }
     output = kp * error + ki * integral + kd * derivative;
     last_e = error;
     return output;

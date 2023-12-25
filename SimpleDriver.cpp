@@ -59,7 +59,7 @@ const float SimpleDriver::clutchMaxTime = 1.5;
 
 double dt = 0.1;
 double setpoint = 0;
-double kp =0.4, ki = 0.001, kd = 0;
+double kp =0.4, ki = 0.002, kd = 0.006;
 
 auto controller = new PID(kp, ki, kd, setpoint, dt);
 
@@ -89,14 +89,16 @@ float SimpleDriver::getSteer(CarState &cs)
 {
 
     double measured_value = (cs.getAngle() / (PI))
-                   + (cs.getTrack(6) - cs.getTrack(12)) / 200
-                //    + (cs.getTrack(8) - cs.getTrack(10)) / 500
+                   + (cs.getTrack(6) - cs.getTrack(12)) / 180
+                   + (cs.getTrack(7) - cs.getTrack(11)) / 250
                 //    + (cs.getTrack(0) - cs.getTrack(18)) / 20;
-                //    + (cs.getTrackPos()) / 150
+                   + (cs.getTrackPos()) / 200
                 ;
 
 
     double output = controller->compute(measured_value);
+    cout << output << '\n';
+
     return  - (output / steerLock);
 }
 
