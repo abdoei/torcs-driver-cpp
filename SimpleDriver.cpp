@@ -1,11 +1,4 @@
 /***************************************************************************
-
-    file                 : SimpleDriver.cpp
-    copyright            : (C) 2007 Daniele Loiacono
-
- ***************************************************************************/
-
-/***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -14,7 +7,12 @@
  *                                                                         *
  ***************************************************************************/
 #include "SimpleDriver.h"
+#include "SimplePID.cpp"
 using namespace std;
+
+/* Track info */
+const int trackWidth = 20;
+const float sin75 = 0.96592582628;
 
 /* Gear Changing Constants*/
 const int SimpleDriver::gearUp[6] =
@@ -58,12 +56,12 @@ const float SimpleDriver::clutchMaxTime = 1.5;
 
 /* PID constants */
 // PID controller for the speed
-double last_e = 0;
-double integral = 0;
-double t, dt = 0.1;
-double previous_error = 0;
-double error, setpoint = 0, measured_value, derivative, output;
-double kp =1, ki = 0.03, kd = 0.01;
+
+double dt = 0.1;
+double setpoint = 0;
+double kp =1, ki = 0.5, kd = 0;
+
+auto controller = new PID(kp, ki, kd, setpoint, dt);
 
 int SimpleDriver::getGear(CarState &cs)
 {
@@ -90,12 +88,15 @@ int SimpleDriver::getGear(CarState &cs)
 float SimpleDriver::getSteer(CarState &cs)
 {
 
-    measured_value = (cs.getAngle() - cs.getTrackPos() * 0.5);
-    error = setpoint - measured_value;
-    integral = integral + error * dt;
-    derivative = (error - last_e) / dt;
-    output = kp * error + ki * integral + kd * derivative;
-    previous_error = error;
+    double measured_value = (cs.getAngle() / (PI))
+                   + (cs.getTrack(6) - cs.getTrack(12)) / 200
+                //    + (cs.getTrack(8) - cs.getTrack(10)) / 500
+                //    + (cs.getTrack(0) - cs.getTrack(18)) / 20;
+                   + (cs.getTrackPos()) / 150
+                ;
+
+
+    double output = controller->compute(measured_value);
     return  - (output / steerLock);
 }
 
@@ -279,9 +280,9 @@ void SimpleDriver::clutching(CarState &cs, float &clutch)
         double delta = clutchDelta;
         if (cs.getGear() < 2)
         {
-            // Apply a stronger clutch output when the gear is one and the race is just started
-            delta /= 2;
-            maxClutch *= clutchMaxModifier;
+            // // Apply a stronger clutch output when the gear is one and the race is just started
+            delta *= 50;
+            // maxClutch *= clutchMaxModifier;
             if (cs.getCurLapTime() < clutchMaxTime)
                 clutch = maxClutch;
         }
