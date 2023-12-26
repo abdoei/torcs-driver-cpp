@@ -29,7 +29,7 @@ const float SimpleDriver::stuckAngle = .523598775; // PI/6
 /* Accel and Brake Constants*/
 const float SimpleDriver::maxSpeedDist = 70;
 // const float SimpleDriver::maxSpeed = 150;
-const float SimpleDriver::maxSpeed = 300;
+const float SimpleDriver::maxSpeed = 350;
 const float SimpleDriver::sin5 = 0.08716;
 const float SimpleDriver::cos5 = 0.99619;
 
@@ -272,36 +272,28 @@ void SimpleDriver::clutching(CarState &cs, float &clutch)
 {
     double maxClutch = clutchMax;
 
-    // Check if the current situation is the race start
-    if (cs.getCurLapTime() < clutchDeltaTime && stage == RACE && cs.getDistRaced() < clutchDeltaRaced)
-        clutch = maxClutch;
-
-    // Adjust the current value of the clutch
-    if (clutch > 0)
+    double delta = clutchDelta;
+    if (cs.getGear() < 2)
     {
-        double delta = clutchDelta;
-        if (cs.getGear() < 2)
-        {
-            // // Apply a stronger clutch output when the gear is one and the race is just started
-            delta *= 50;
-            // maxClutch *= clutchMaxModifier;
-            if (cs.getCurLapTime() < clutchMaxTime)
-                clutch = maxClutch;
-        }
-
-        // check clutch is not bigger than maximum values
-        clutch = min(maxClutch, double(clutch));
-
-        // if clutch is not at max value decrease it quite quickly
-        if (clutch != maxClutch)
-        {
-            clutch -= delta;
-            clutch = max(0.0, double(clutch));
-        }
-        // if clutch is at max value decrease it very slowly
-        else
-            clutch -= clutchDec;
+        // // Apply a stronger clutch output when the gear is one and the race is just started
+        delta *= 50;
+        // maxClutch *= clutchMaxModifier;
+        if (cs.getCurLapTime() < clutchMaxTime)
+            clutch = maxClutch;
     }
+
+    // check clutch is not bigger than maximum values
+    clutch = min(maxClutch, double(clutch));
+
+    // if clutch is not at max value decrease it quite quickly
+    if (clutch != maxClutch)
+    {
+        clutch -= delta;
+        clutch = max(0.0, double(clutch));
+    }
+    // if clutch is at max value decrease it very slowly
+    else
+        clutch -= clutchDec;
 }
 
 void SimpleDriver::init(float *angles)
