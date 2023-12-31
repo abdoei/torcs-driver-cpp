@@ -7,7 +7,6 @@
  *                                                                         *
  ***************************************************************************/
 #include "SimpleDriver.h"
-#include "SimplePID.cpp"
 using namespace std;
 
 /* Track info */
@@ -17,10 +16,12 @@ const float sin75 = 0.96592582628;
 /* Gear Changing Constants*/
 const int SimpleDriver::gearUp[6] =
     {
-        5000, 6000, 6000, 6500, 7000, 0};
+        5000, 6000, 6000, 6500, 7000, 0
+        };
 const int SimpleDriver::gearDown[6] =
     {
-        0, 2500, 3000, 3000, 3500, 3500};
+        0, 2500, 3000, 3000, 3500, 3500
+        };
 
 /* Stuck constants*/
 const int SimpleDriver::stuckTime = 25;
@@ -29,7 +30,7 @@ const float SimpleDriver::stuckAngle = .523598775; // PI/6
 /* Accel and Brake Constants*/
 const float SimpleDriver::maxSpeedDist = 70;
 // const float SimpleDriver::maxSpeed = 150;
-const float SimpleDriver::maxSpeed = 350;
+const float SimpleDriver::maxSpeed = 300;
 const float SimpleDriver::sin5 = 0.08716;
 const float SimpleDriver::cos5 = 0.99619;
 
@@ -59,7 +60,7 @@ const float SimpleDriver::clutchMaxTime = 1.5;
 
 double dt = 0.1;
 double setpoint = 0;
-double kp =0.4, ki = 0.002, kd = 0.006;
+double kp = 4, ki = 1.5, kd = 0.01;
 
 auto controller = new PID(kp, ki, kd, setpoint, dt);
 
@@ -92,14 +93,14 @@ float SimpleDriver::getSteer(CarState &cs)
                    + (cs.getTrack(6) - cs.getTrack(12)) / 180
                    + (cs.getTrack(7) - cs.getTrack(11)) / 250
                 //    + (cs.getTrack(0) - cs.getTrack(18)) / 20;
-                   + (cs.getTrackPos()) / 200
+                   + (-cs.getTrackPos()) / 7
                 ;
 
 
     double output = controller->compute(measured_value);
     cout << output << '\n';
 
-    return  - (output / steerLock);
+    return  - (output / 4);
 }
 
 float SimpleDriver::getAccel(CarState &cs)

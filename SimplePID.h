@@ -43,6 +43,8 @@ private:
     double setPoint;
     double dt;
     double sampleTime;
+    double maxI=1;
+    double maxD=1;
 };
 
 #endif /* SIMPLEPID_H_ */

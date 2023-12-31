@@ -6,39 +6,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-
-class PID
-{
-public:
-    PID(double kp, double ki, double kd, double sp, double dt);
-    PID() = default;
-    void setSetPoint(double setPoint);
-    void setInput(double input);
-    void setKp(double kp);
-    void setKi(double ki);
-    void setKd(double kd);
-    void setSampleTime(double sampleTime);
-    double compute(double input);
-
-    double getError();
-    double getOutput();
-
-private:
-    double kp;
-    double ki;
-    double kd;
-    double error;
-    double last_e;
-    double integral;
-    double derivative;
-    double input;
-    double output;
-    double setPoint;
-    double dt;
-    double sampleTime;
-    double maxI = 1;
-    double maxD = 1;
-};
+#include "SimpleDriver.h"
 
 PID::PID(double kp, double ki, double kd, double sp, double dt)
     : kp(kp), ki(ki), kd(kd), setPoint(sp), dt(dt)
